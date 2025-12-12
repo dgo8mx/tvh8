@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen de Práctica DMV Nevada - Interactivo con Imágenes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .score-board {
+            background: #f8f9fa;
+            padding: 20px;
+            display: flex;
+            justify-content: space-around;
+            border-bottom: 3px solid #e9ecef;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .score-item {
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #1e3c72;
+            margin-top: 5px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .question-card {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .question-card.correct {
+            border-color: #28a745;
+            background: #f1f9f3;
+        }
+
+        .question-card.incorrect {
+            border-color: #dc3545;
+            background: #fdf3f4;
+        }
+
+        .question-number {
+            display: inline-block;
+            background: #1e3c72;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+
+        .question-image {
+            width: 100%;
+            max-width: 400px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 15px auto;
+            display: block;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            list-style: none;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover:not(.selected):not(.disabled) {
+            background: #e9ecef;
+            border-color: #adb5bd;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: #cfe2ff;
+            border-color: #0d6efd;
+            font-weight: 600;
+        }
+
+        .option.correct {
+            background: #d1e7dd;
+            border-color: #28a745;
+            font-weight: 600;
+        }
+
+        .option.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+            font-weight: 600;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .option-letter {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #1e3c72;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .option.correct .option-letter {
+            background: #28a745;
+        }
+
+        .option.incorrect .option-letter {
+            background: #dc3545;
+        }
+
+        .explanation {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .explanation-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .explanation-title::before {
+            content: "💡";
+            margin-right: 8px;
+            font-size: 1.2em;
+        }
+
+        .explanation-text {
+            color: #533f03;
+            line-height: 1.6;
+        }
+
+        .english-term {
+            display: inline-block;
+            background: #e7f3ff;
+            color: #0066cc;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .terminology-box {
+            background: #f0f8ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+
+        .terminology-title {
+            font-weight: bold;
+            color: #0066cc;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .term-item {
+            color: #004080;
+            padding: 3px 0;
+            font-size: 0.9em;
+        }
+
+        .results-section {
+            background: #fff;
+            border: 3px solid #1e3c72;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+            animation: slideDown 0.5s ease;
+        }
+
+        .final-score {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .final-score.pass {
+            color: #28a745;
+        }
+
+        .final-score.fail {
+            color: #dc3545;
+        }
+
+        .restart-button {
+            background: #1e3c72;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .restart-button:hover {
+            background: #2a5298;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .question-text {
+                font-size: 1.1em;
+            }
+            
+            .score-board {
+                flex-direction: column;
+            }
+            
+            .question-image {
+                max-width: 100%;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 Examen de Práctica DMV Nevada 🚗</h1>
+            <p>50 preguntas con explicaciones detalladas e imágenes</p>
+        </div>
+
+        <div class="score-board">
+            <div class="score-item">
+                <div class="score-label">Progreso</div>
+                <div class="score-value" id="progress">0/50</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Correctas</div>
+                <div class="score-value" id="correct" style="color: #28a745;">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Incorrectas</div>
+                <div class="score-value" id="incorrect" style="color: #dc3545;">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Porcentaje</div>
+                <div class="score-value" id="percentage">0%</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div id="questions-container"></div>
+            
+            <div class="results-section" id="finalResults">
+                <h2>📊 Resultados Finales</h2>
+                <div class="final-score" id="finalScore"></div>
+                <div id="finalMessage"></div>
+                <button class="restart-button" onclick="resetExam()">🔄 Reiniciar Examen</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es el límite de velocidad en zonas escolares de Nevada cuando los niños están presentes?",
+                image: "https://images.unsplash.com/photo-1587691592099-24045742c181?w=800&auto=format&fit=crop",
+                options: [
+                    "15 MPH",
+                    "20 MPH",
+                    "25 MPH",
+                    "30 MPH"
+                ],
+                correct: 0,
+                explanation: "En Nevada, el límite de velocidad en zonas escolares es de 15 MPH cuando los niños están presentes o cuando las luces intermitentes están activas. Esta velocidad reducida permite a los conductores reaccionar rápidamente ante situaciones imprevistas con niños.",
+                terminology: [
+                    "Zona escolar / School zone",
+                    "Límite de velocidad / Speed limit",
+                    "MPH (Millas por hora) / Miles per hour"
+                ]
+            },
+            {
+                question: "¿Qué debe hacer cuando se aproxima a un autobús escolar detenido con luces rojas intermitentes?",
+                image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&auto=format&fit=crop",
+                options: [
+                    "Reducir la velocidad y pasar con precaución",
+                    "Detenerse completamente hasta que las luces dejen de parpadear",
+                    "Cambiar de carril y continuar",
+                    "Tocar el claxon para advertir al autobús"
+                ],
+                correct: 1,
+                explanation: "DEBE detenerse completamente cuando un autobús escolar tiene las luces rojas intermitentes activadas y el brazo de alto extendido, sin importar en qué dirección viaje. Esto aplica en ambos sentidos de la calle, a menos que haya un separador físico. Las multas por no detenerse pueden ser de hasta $1,000 en Nevada.",
+                terminology: [
+                    "Autobús escolar / School bus",
+                    "Luces intermitentes / Flashing lights",
+                    "Detenerse / Stop",
+                    "Brazo de alto / Stop arm"
+                ]
+            },
+            {
+                question: "¿A qué distancia debe estacionarse de una boca de incendios (hidrante)?",
+                image: "https://images.unsplash.com/photo-1568454537842-d933259bb258?w=800&auto=format&fit=crop",
+                options: [
+                    "5 pies",
+                    "10 pies",
+                    "15 pies",
+                    "20 pies"
+                ],
+                correct: 2,
+                explanation: "Debe mantener una distancia mínima de 15 PIES (aproximadamente 4.5 metros) de cualquier boca de incendios. Esta distancia permite a los bomberos acceder rápidamente al hidrante en caso de emergencia. Estacionarse más cerca puede resultar en una multa y remolque del vehículo.",
+                terminology: [
+                    "Boca de incendios / Fire hydrant",
+                    "Estacionarse / Park",
+                    "Pies / Feet",
+                    "Hidrante / Hydrant"
+                ]
+            },
+            {
+                question: "En Nevada, ¿cuántos puntos de demérito acumula por exceso de velocidad de 1-10 MPH sobre el límite?",
+                image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+                options: [
+                    "1 punto",
+                    "2 puntos",
+                    "3 puntos",
+                    "4 puntos"
+                ],
+                correct: 0,
+                explanation: "Por exceso de velocidad de 1-10 MPH sobre el límite, se acumula 1 PUNTO de demérito. De 11-20 MPH son 2 puntos, de 21-30 MPH son 3 puntos, y más de 30 MPH sobre el límite son 4 puntos. Si acumula 12 puntos en 12 meses, su licencia será suspendida.",
+                terminology: [
+                    "Puntos de demérito / Demerit points",
+                    "Exceso de velocidad / Speeding",
+                    "Suspensión / Suspension"
+                ]
+            },
+            {
+                question: "¿Qué significa una señal de alto octagonal (STOP)?",
+                image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=800&auto=format&fit=crop",
+                options: [
+                    "Reducir la velocidad y continuar si es seguro",
+                    "Detenerse completamente y ceder el paso",
+                    "Detenerse solo si vienen vehículos",
+                    "Es solo una sugerencia"
+                ],
+                correct: 1,
+                explanation: "Una señal de STOP (octagonal roja) requiere que SIEMPRE se detenga completamente detrás de la línea de parada o cruce peatonal. Debe ceder el paso a todos los vehículos y peatones antes de proceder. No detenerse completamente resulta en 4 puntos de demérito en Nevada.",
+                terminology: [
+                    "Alto / Stop",
+                    "Octagonal / Octagon",
+                    "Ceder el paso / Yield",
+                    "Cruce peatonal / Crosswalk"
+                ]
+            },
+            {
+                question: "¿Cuál es el nivel legal de concentración de alcohol en sangre (BAC) para conductores mayores de 21 años en Nevada?",
+                image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&auto=format&fit=crop",
+                options: [
+                    "0.05%",
+                    "0.08%",
+                    "0.10%",
+                    "0.12%"
+                ],
+                correct: 1,
+                explanation: "El límite legal de BAC en Nevada es 0.08% para conductores mayores de 21 años. Para menores de 21 años, Nevada tiene una política de tolerancia cero (0.02%). Conducir con BAC de 0.08% o más resulta en arresto por DUI, con penas que incluyen multas de hasta $1,000, suspensión de licencia, y posible cárcel.",
+                terminology: [
+                    "BAC (Concentración de alcohol en sangre) / Blood Alcohol Concentration",
+                    "DUI (Conducir bajo influencia) / Driving Under the Influence",
+                    "Tolerancia cero / Zero tolerance"
+                ]
+            },
+            {
+                question: "¿A qué distancia mínima debe seguir a otro vehículo en condiciones normales?",
+                image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+                options: [
+                    "1 segundo",
+                    "2 segundos",
+                    "3 segundos",
+                    "5 segundos"
+                ],
+                correct: 2,
+                explanation: "La regla de los 3 SEGUNDOS es el mínimo recomendado en condiciones normales. Elija un punto de referencia fijo (como un poste), cuando el vehículo de adelante lo pase, comience a contar '1001, 1002, 1003'. Si usted llega al punto antes de terminar de contar, está muy cerca. Aumente la distancia en mal tiempo o con tráfico pesado.",
+                terminology: [
+                    "Distancia de seguimiento / Following distance",
+                    "Regla de segundos / Seconds rule",
+                    "Punto de referencia / Reference point"
+                ]
+            },
+            {
+                question: "¿Qué indica una luz amarilla en un semáforo?",
+                image: "https://images.unsplash.com/photo-1570193712014-e2a6c4f6b5a5?w=800&auto=format&fit=crop",
+                options: [
+                    "Acelerar para pasar la intersección",
+                    "La luz está a punto de cambiar a rojo, prepárese para detenerse",
+                    "Puede continuar sin precaución",
+                    "Es opcional detenerse"
+                ],
+                correct: 1,
+                explanation: "Una luz AMARILLA significa que la luz está a punto de cambiar a rojo. Debe prepararse para detenerse de manera segura ANTES de la intersección. Solo debe continuar si ya está muy cerca de la intersección y detenerse sería peligroso. NO acelere para 'ganarle' a la luz amarilla.",
+                terminology: [
+                    "Semáforo / Traffic light",
+                    "Luz amarilla / Yellow light",
+                    "Intersección / Intersection",
+                    "Prepararse para detenerse / Prepare to stop"
+                ]
+            },
+            {
+                question: "¿Cuándo debe usar las luces altas (high beams)?",
+                image: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800&auto=format&fit=crop",
+                options: [
+                    "Siempre que esté oscuro",
+                    "Solo en carreteras rurales sin tráfico",
+                    "En carreteras oscuras cuando no hay tráfico cercano",
+                    "Nunca, son ilegales"
+                ],
+                correct: 2,
+                explanation: "Use luces ALTAS en carreteras oscuras y rurales cuando NO haya vehículos a 500 pies adelante o 300 pies atrás. DEBE cambiar a luces bajas cuando se aproxime a otro vehículo o vaya detrás de uno. Las luces altas encandilan a otros conductores y son peligrosas en tráfico.",
+                terminology: [
+                    "Luces altas / High beams",
+                    "Luces bajas / Low beams",
+                    "Encandilar / Blind/Glare",
+                    "Pies / Feet"
+                ]
+            },
+            {
+                question: "En un cruce de 4 vías (4-way stop), ¿quién tiene el derecho de paso?",
+                image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=800&auto=format&fit=crop",
+                options: [
+                    "El vehículo más grande",
+                    "El vehículo que llegó primero",
+                    "El vehículo de la derecha",
+                    "El que toque el claxon primero"
+                ],
+                correct: 1,
+                explanation: "En un cruce de 4 vías, el vehículo que LLEGÓ PRIMERO tiene el derecho de paso. Si dos vehículos llegan al mismo tiempo, el vehículo de la DERECHA tiene prioridad. Si llegan cuatro vehículos simultáneamente, use contacto visual y cortesía para proceder de manera segura.",
+                terminology: [
+                    "Cruce de 4 vías / 4-way stop",
+                    "Derecho de paso / Right of way",
+                    "Prioridad / Priority"
+                ]
+            },
+            {
+                question: "¿A qué distancia antes de un giro debe activar su señal direccional?",
+                image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+                options: [
+                    "25 pies",
+                    "50 pies",
+                    "75 pies",
+                    "100 pies"
+                ],
+                correct: 3,
+                explanation: "Debe activar su señal direccional al menos 100 PIES antes de girar. En carreteras de alta velocidad, active la señal incluso antes. Esto da tiempo suficiente a otros conductores para reaccionar a sus intenciones. No señalizar puede resultar en una multa y puntos de demérito.",
+                terminology: [
+                    "Señal direccional / Turn signal",
+                    "Giro / Turn",
+                    "Pies / Feet",
+                    "Indicador / Blinker"
+                ]
+            },
+            {
+                question: "¿Cuál es la multa por usar un teléfono celular sin manos libres mientras conduce en Nevada?",
+                image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&auto=format&fit=crop",
+                options: [
+                    "$50 primera ofensa",
+                    "$100 primera ofensa",
+                    "$250 primera ofensa",
+                    "$500 primera ofensa"
+                ],
+                correct: 0,
+                explanation: "En Nevada, usar un teléfono celular SIN MANOS LIBRES mientras conduce resulta en: $50 primera ofensa, $100 segunda ofensa, $250 tercera ofensa y subsecuentes. Si causa un accidente mientras usa el teléfono, las multas y consecuencias son mucho más severas.",
+                terminology: [
+                    "Teléfono celular / Cell phone",
+                    "Manos libres / Hands-free",
+                    "Multa / Fine",
+                    "Ofensa / Offense"
+                ]
+            },
+            {
+                question: "¿Qué debe hacer cuando escucha una sirena de vehículo de emergencia?",
+                image: "https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=800&auto=format&fit=crop",
+                options: [
+                    "Continuar normalmente",
+                    "Acelerar para despejar el camino",
+                    "Detenerse inmediatamente donde está",
+                    "Orillarse a la derecha y detenerse"
+                ],
+                correct: 3,
+                explanation: "Cuando escuche una sirena de VEHÍCULO DE EMERGENCIA (ambulancia, policía, bomberos), debe orillarse lo más posible a la DERECHA y DETENERSE completamente hasta que el vehículo pase. NUNCA se detenga en medio de una intersección. La multa por no ceder el paso a vehículos de emergencia puede ser de hasta $1,000.",
+                terminology: [
+                    "Vehículo de emergencia / Emergency vehicle",
+                    "Sirena / Siren",
+                    "Orillarse / Pull over",
+                    "Ceder el paso / Yield"
+                ]
+            },
+            {
+                question: "En Nevada, ¿cuándo pueden los peatones cruzar en un paso peatonal?",
+                image: "https://images.unsplash.com/photo-1573152143286-0c422b4d2175?w=800&auto=format&fit=crop",
+                options: [
+                    "Solo cuando la señal peatonal lo indique",
+                    "Siempre tienen el derecho de paso",
+                    "Solo en cruces marcados",
+                    "Nunca, deben usar puentes peatonales"
+                ],
+                correct: 1,
+                explanation: "En Nevada, los peatones SIEMPRE tienen el derecho de paso en cruces peatonales marcados y no marcados en las intersecciones. Los conductores DEBEN detenerse y ceder el paso. No hacerlo resulta en multa de hasta $395 y 4 puntos de demérito. Sea extremadamente cauteloso en zonas con peatones.",
+                terminology: [
+                    "Peatón / Pedestrian",
+                    "Paso peatonal / Crosswalk",
+                    "Derecho de paso / Right of way",
+                    "Cruce / Crossing"
+                ]
+            },
+            {
+                question: "¿Qué significa una línea amarilla continua doble en el centro de la carretera?",
+                image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+                options: [
+                    "Puede rebasar con precaución",
+                    "Puede rebasar solo de día",
+                    "Prohibido rebasar en ambas direcciones",
+                    "Solo indica el centro de la carretera"
+                ],
+                correct: 2,
+                explanation: "Una línea AMARILLA CONTINUA DOBLE significa que está PROHIBIDO rebasar en AMBAS direcciones. Cruzar esta línea es ilegal excepto para girar a la izquierda hacia una entrada o calle lateral. Violar esta regla puede resultar en multa de hasta $1,000 y 4 puntos de demérito.",
+                terminology: [
+                    "Línea continua doble / Double solid line",
+                    "Rebasar / Pass/Overtake",
+                    "Prohibido / No passing zone",
+                    "Centro de carretera / Center line"
+                ]
+            },
+            {
+                question: "¿Cuál es la velocidad máxima en autopistas interestatales de Nevada, a menos que se indique lo contrario?",
+                image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+                options: [
+                    "55 MPH",
+                    "65 MPH",
+                    "70 MPH",
+                    "80 MPH"
+                ],
+                correct: 3,
+                explanation: "En Nevada, el límite de velocidad en autopistas interestatales rurales es de 80 MPH (el más alto en EE.UU.), a menos que las señales indiquen lo contrario. En áreas urbanas de autopistas, el límite suele ser de 65 MPH. Siempre ajuste su velocidad a las condiciones del clima y tráfico.",
+                terminology: [
+                    "Autopista interestatal / Interstate highway",
+                    "Límite de velocidad / Speed limit",
+                    "MPH / Miles per hour",
+                    "Rural / Rural"
+                ]
+            },
+            {
+                question: "Si su vehículo comienza a derrapar (skid), ¿qué debe hacer?",
+                image: "https://images.unsplash.com/photo-1611329532992-0f6d89faa107?w=800&auto=format&fit=crop",
+                options: [
+                    "Frenar fuertemente",
+                    "Girar el volante en dirección opuesta al derrape",
+                    "Quitar el pie del acelerador y girar el volante en la dirección del derrape",
+                    "Acelerar para recuperar el control"
+                ],
+                correct: 2,
+                explanation: "Si su vehículo derrapa, NO frene bruscamente. QUITE el pie del acelerador y gire el volante suavemente EN LA DIRECCIÓN que quiere que vaya la parte frontal del vehículo (hacia donde va el derrape). No sobre-corrija. Con ABS, mantenga presión firme en el freno mientras dirige.",
+                terminology: [
+                    "Derrapar / Skid",
+                    "Volante / Steering wheel",
+                    "Acelerador / Gas pedal",
+                    "ABS / Anti-lock Braking System"
+                ]
+            },
+            {
+                question: "¿Qué indica una señal triangular roja invertida (YIELD)?",
+                image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=800&auto=format&fit=crop",
+                options: [
+                    "Detenerse completamente siempre",
+                    "Reducir velocidad y ceder el paso si es necesario",
+                    "Solo una advertencia",
+                    "Acelerar para fusionarse"
+                ],
+                correct: 1,
+                explanation: "La señal YIELD (CEDA EL PASO) de triángulo rojo invertido significa que debe reducir la velocidad y estar preparado para detenerse si es necesario para ceder el paso a otros vehículos o peatones. Si no hay tráfico, puede continuar con precaución. No ceder cuando se requiere puede resultar en multa y puntos.",
+                terminology: [
+                    "Yield / Ceda el paso",
+                    "Triangular invertido / Inverted triangle",
+                    "Reducir velocidad / Slow down",
+                    "Ceder el paso / Yield right of way"
+                ]
+            },
+            {
+                question: "¿A qué edad mínima puede obtener una licencia de conducir sin restricciones en Nevada?",
+                image: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=800&auto=format&fit=crop",
+                options: [
+                    "16 años",
+                    "17 años",
+                    "18 años",
+                    "21 años"
+                ],
+                correct: 2,
+                explanation: "En Nevada, puede obtener una licencia de conducir COMPLETA (sin restricciones) a los 18 AÑOS. A los 16 puede obtener un permiso de aprendizaje, y a los 16.5 años una licencia restringida (con limitaciones como no conducir de noche sin adulto y límite de pasajeros menores).",
+                terminology: [
+                    "Licencia completa / Full license",
+                    "Sin restricciones / Unrestricted",
+                    "Permiso de aprendizaje / Learner's permit",
+                    "Licencia restringida / Restricted license"
+                ]
+            },
+            {
+                question: "¿Cuál es la distancia mínima para estacionarse de una esquina?",
+                image: "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800&auto=format&fit=crop",
+                options: [
+                    "10 pies",
+                    "20 pies",
+                    "30 pies",
+                    "50 pies"
+                ],
+                correct: 2,
+                explanation: "Debe estacionarse al menos a 30 PIES de distancia de una esquina o intersección. Esta distancia asegura que no obstruya la visibilidad de otros conductores y peatones en la intersección. Estacionarse muy cerca de una esquina es peligroso y puede resultar en una multa y remolque del vehículo.",
+                terminology: [
+                    "Esquina / Corner",
+                    "Intersección / Intersection",
+                    "Estacionarse / Park",
+                    "Distancia mínima / Minimum distance"
+                ]
+            },
+            {
+                question: "¿Qué debe hacer si su vehículo se queda sin frenos?",
+                image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+                options: [
+                    "Apagar el motor inmediatamente",
+                    "Bombear el pedal del freno, usar freno de emergencia gradualmente",
+                    "Acelerar para llegar rápido a un lugar seguro",
+                    "Girar el volante bruscamente"
+                ],
+                correct: 1,
+                explanation: "Si falla el freno: (1) BOMBEE el pedal del freno rápidamente para intentar generar presión, (2) cambie a marchas más bajas para reducir velocidad, (3) use el FRENO DE EMERGENCIA GRADUALMENTE (no bruscamente o derrapará), (4) busque una ruta de escape segura, (5) encienda las luces de emergencia.",
+                terminology: [
+                    "Frenos / Brakes",
+                    "Bombear / Pump",
+                    "Freno de emergencia / Emergency/Parking brake",
+                    "Marchas / Gears"
+                ]
+            },
+            {
+                question: "¿Qué significa una señal amarilla de diamante con símbolo de curva?",
+                image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=800&auto=format&fit=crop",
+                options: [
+                    "Curva decorativa opcional",
+                    "Advertencia de curva adelante, reduzca velocidad",
+                    "Zona de curvas recreativas",
+                    "Velocidad mínima requerida"
+                ],
+                correct: 1,
+                explanation: "Las señales AMARILLAS DE DIAMANTE son señales de ADVERTENCIA. Una con símbolo de curva advierte que hay una curva cerrada adelante. Debe REDUCIR la velocidad ANTES de entrar a la curva. La flecha indica la dirección y severidad de la curva. Tomar curvas a exceso de velocidad puede causar pérdida de control.",
+                terminology: [
+                    "Señal de advertencia / Warning sign",
+                    "Diamante amarillo / Yellow diamond",
+                    "Curva / Curve",
+                    "Reducir velocidad / Slow down"
+                ]
+            },
+            {
+                question: "¿Qué significa una luz roja intermitente en un semáforo?",
+                image: "https://images.unsplash.com/photo-1570193712014-e2a6c4f6b5a5?w=800&auto=format&fit=crop",
+                options: [
+                    "Precaución, proceda despacio",
+                    "Tratarlo como señal de STOP",
+                    "La luz está rota, pase rápido",
+                    "Solo aplicable de noche"
+                ],
+                correct: 1,
+                explanation: "Una luz ROJA INTERMITENTE debe tratarse EXACTAMENTE como una señal de STOP. Debe detenerse completamente, verificar que sea seguro, y luego proceder. Comúnmente se encuentra en cruces de ferrocarril e intersecciones menos transitadas. No detenerse puede resultar en 4 puntos de demérito.",
+                terminology: [
+                    "Luz roja intermitente / Flashing red light",
+                    "Tratarlo como / Treat as",
+                    "Señal de alto / Stop sign",
+                    "Detenerse completamente / Come to complete stop"
+                ]
+            },
+            {
+                question: "¿Cuándo está permitido rebasar por la derecha?",
+                image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+                options: [
+                    "Nunca está permitido",
+                    "Solo en carreteras de un solo carril",
+                    "En carreteras con múltiples carriles en su dirección o cuando el vehículo adelante va a girar a la izquierda",
+                    "Siempre que haya espacio"
+                ],
+                correct: 2,
+                explanation: "Puede rebasar por la derecha LEGALMENTE en: (1) carreteras con dos o más carriles en su dirección de viaje, (2) cuando el vehículo adelante está girando a la izquierda y hay espacio seguro. Rebasar por el arcén/hombro derecho es ILEGAL excepto en circunstancias muy específicas.",
+                terminology: [
+                    "Rebasar / Pass/Overtake",
+                    "Por la derecha / On the right",
+                    "Múltiples carriles / Multiple lanes",
+                    "Arcén / Shoulder"
+                ]
+            },
+            {
+                question: "¿Qué debe hacer cuando ve un peatón con bastón blanco?",
+                image: "https://images.unsplash.com/photo-1573152143286-0c422b4d2175?w=800&auto=format&fit=crop",
+                options: [
+                    "Continuar con precaución",
+                    "Tocar el claxon para alertarlo",
+                    "Detenerse completamente y ceder el paso",
+                    "Pasar rápidamente"
+                ],
+                correct: 2,
+                explanation: "Un bastón BLANCO indica que la persona es CIEGA o tiene discapacidad visual severa. DEBE detenerse completamente y ceder el paso. NUNCA toque el claxon ya que esto puede desorientar a la persona. Espere hasta que crucen completamente de manera segura. En Nevada, no ceder el paso puede resultar en multa de hasta $1,000.",
+                terminology: [
+                    "Bastón blanco / White cane",
+                    "Ciego / Blind",
+                    "Discapacidad visual / Visual impairment",
+                    "Ceder el paso / Yield"
+                ]
+            },
+            {
+                question: "¿Qué indican las líneas blancas discontinuas entre carriles?",
+                image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+                options: [
+                    "No puede cambiar de carril",
+                    "Puede cambiar de carril si es seguro",
+                    "Solo para emergencias",
+                    "Carriles de alta velocidad"
+                ],
+                correct: 1,
+                explanation: "Las líneas BLANCAS DISCONTINUAS (punteadas) separan carriles que van en la misma dirección y significan que PUEDE cambiar de carril SI ES SEGURO hacerlo. Siempre use su señal, verifique puntos ciegos, y asegúrese de que haya espacio suficiente antes de cambiar de carril.",
+                terminology: [
+                    "Líneas discontinuas / Broken/Dashed lines",
+                    "Cambiar de carril / Change lanes",
+                    "Puntos ciegos / Blind spots",
+                    "Misma dirección / Same direction"
+                ]
+            },
+            {
+                question: "¿A qué distancia debe colocar triángulos reflectantes si su vehículo se descompone en la autopista?",
+                image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+                options: [
+                    "10 pies atrás solamente",
+                    "50 pies adelante y atrás",
+                    "100 pies atrás, 200 pies y 300 pies",
+                    "500 pies en todas direcciones"
+                ],
+                correct: 2,
+                explanation: "En autopistas, debe colocar dispositivos de advertencia a: 100 PIES atrás del vehículo, 200 pies atrás, y 300 pies atrás. En carreteras de dos sentidos, también coloque uno a 100 pies adelante. Estos dispositivos advierten a otros conductores y son requeridos para vehículos comerciales.",
+                terminology: [
+                    "Triángulos reflectantes / Reflective triangles",
+                    "Descomponer / Break down",
+                    "Dispositivos de advertencia / Warning devices",
+                    "Pies / Feet"
+                ]
+            },
+            {
+                question: "¿Qué debe hacer si un vehículo de policía lo detiene?",
+                image: "https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=800&auto=format&fit=crop",
+                options: [
+                    "Detenerse inmediatamente donde está",
+                    "Acelerar hasta llegar a casa",
+                    "Orillarse de manera segura, apagar motor, quedarse en el vehículo",
+                    "Salir del vehículo y acercarse al policía"
+                ],
+                correct: 2,
+                explanation: "Si la policía lo detiene: (1) ORILLARSE a la derecha de manera SEGURA lo antes posible, (2) APAGAR el motor, (3) PERMANECER en el vehículo con las manos visibles en el volante, (4) encender luces interiores si es de noche, (5) NO salga del vehículo a menos que se lo soliciten.",
+                terminology: [
+                    "Policía / Police",
+                    "Detener / Pull over",
+                    "Orillarse / Pull to the side",
+                    "Permanecer / Stay/Remain"
+                ]
+            },
+            {
+                question: "¿Cuál es el límite de velocidad en áreas residenciales de Nevada si no hay señales?",
+                image: "https://images.unsplash.com/photo-1588282016007-90c218b56fde?w=800&auto=format&fit=crop",
+                options: [
+                    "15 MPH",
+                    "25 MPH",
+                    "35 MPH",
+                    "45 MPH"
+                ],
+                correct: 1,
+                explanation: "El límite de velocidad PREDETERMINADO en áreas residenciales y distritos comerciales de Nevada es de 25 MPH cuando no hay señales publicadas. En zonas escolares activas es de 15 MPH. Siempre ajuste su velocidad a las condiciones y esté atento a niños, mascotas y peatones.",
+                terminology: [
+                    "Área residencial / Residential area",
+                    "Predeterminado / Default",
+                    "Distrito comercial / Business district",
+                    "Señales publicadas / Posted signs"
+                ]
+            },
+            {
+                question: "¿Qué debe hacer cuando se aproxima a un cruce de ferrocarril con luces rojas intermitentes?",
+                image: "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800&auto=format&fit=crop",
+                options: [
+                    "Reducir velocidad y mirar",
+                    "Detenerse a al menos 15 pies de la vía más cercana",
+                    "Acelerar para cruzar rápido",
+                    "Solo detenerse si ve un tren"
+                ],
+                correct: 1,
+                explanation: "Cuando las luces rojas intermitentes en un cruce de ferrocarril estén activadas, DEBE detenerse a al menos 15 PIES (pero no más de 50 pies) de la vía más cercana. NO proceda hasta que las luces dejen de parpadear y las barreras se levanten completamente. Nunca intente 'ganarle' a un tren.",
+                terminology: [
+                    "Cruce de ferrocarril / Railroad crossing",
+                    "Luces intermitentes / Flashing lights",
+                    "Vía / Track",
+                    "Barreras / Gates"
+                ]
+            },
+            {
+                question: "¿Qué significa una señal rectangular blanca con letras negras?",
+                image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=800&auto=format&fit=crop",
+                options: [
+                    "Señal de advertencia",
+                    "Señal regulatoria (debe obedecer por ley)",
+                    "Señal informativa opcional",
+                    "Señal de construcción"
+                ],
+                correct: 1,
+                explanation: "Las señales RECTANGULARES BLANCAS con letras negras son señales REGULATORIAS - estas indican leyes de tránsito que DEBE obedecer. Ejemplos: límites de velocidad, 'No Turn', 'One Way', 'Do Not Enter'. Violar señales regulatorias resulta en multas y puntos de demérito.",
+                terminology: [
+                    "Rectangular / Rectangular",
+                    "Regulatoria / Regulatory",
+                    "Obedecer / Obey",
+                    "Por ley / By law"
+                ]
+            },
+            {
+                question: "En condiciones de lluvia, ¿cómo debe ajustar su conducción?",
+                image: "https://images.unsplash.com/photo-1527766833261-b09c3163a791?w=800&auto=format&fit=crop",
+                options: [
+                    "Conducir más rápido para salir de la lluvia",
+                    "Reducir velocidad, aumentar distancia de seguimiento, usar luces",
+                    "Mantener misma velocidad",
+                    "Usar solo luces altas"
+                ],
+                correct: 1,
+                explanation: "En LLUVIA: (1) REDUZCA la velocidad - las carreteras mojadas reducen la tracción, (2) AUMENTE la distancia de seguimiento a 4-5 segundos, (3) use LUCES BAJAS (no altas), (4) evite frenado brusco, (5) tenga cuidado con el AQUAPLANING (hydroplaning) - si ocurre, quite pie del acelerador y mantenga el volante recto.",
+                terminology: [
+                    "Lluvia / Rain",
+                    "Tracción / Traction",
+                    "Aquaplaning / Hydroplaning",
+                    "Distancia de seguimiento / Following distance"
+                ]
+            },
+            {
+                question: "¿Qué debe hacer si una llanta revienta mientras conduce?",
+                image: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800&auto=format&fit=crop",
+                options: [
+                    "Frenar inmediatamente con fuerza",
+                    "Agarrar firmemente el volante, quitar pie del acelerador gradualmente, orillarse",
+                    "Acelerar para mantener control",
+                    "Cambiar de carril rápidamente"
+                ],
+                correct: 1,
+                explanation: "Si una llanta REVIENTA: (1) AGARRE el volante FIRMEMENTE con ambas manos, (2) NO frene bruscamente, (3) QUITE el pie del acelerador GRADUALMENTE, (4) deje que el vehículo reduzca velocidad naturalmente, (5) ORILLE suavemente cuando sea seguro, (6) luego frene suavemente. NO sobre-corrija el volante.",
+                terminology: [
+                    "Llanta revienta / Tire blowout",
+                    "Agarrar firmemente / Hold firmly",
+                    "Orillarse / Pull over",
+                    "Sobre-corregir / Over-correct"
+                ]
+            },
+            {
+                question: "¿Cuándo debe usar las luces intermitentes de emergencia (hazard lights)?",
+                image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+                options: [
+                    "Cuando conduce lentamente en una autopista",
+                    "Cuando su vehículo está descompuesto o hay emergencia",
+                    "Para estacionarse brevemente",
+                    "Cuando llueve fuerte"
+                ],
+                correct: 1,
+                explanation: "Use luces INTERMITENTES DE EMERGENCIA cuando: (1) su vehículo está DESCOMPUESTO o detenido en la carretera, (2) hay una EMERGENCIA, (3) está remolcando otro vehículo. NO las use mientras conduce en lluvia o niebla (esto confunde a otros conductores sobre sus intenciones). En Nevada, úselas solo cuando esté detenido o en emergencia.",
+                terminology: [
+                    "Luces intermitentes de emergencia / Hazard lights",
+                    "Descompuesto / Broken down",
+                    "Emergencia / Emergency",
+                    "Remolcar / Tow"
+                ]
+            },
+            {
+                question: "¿Qué indica una flecha verde en un semáforo?",
+                image: "https://images.unsplash.com/photo-1570193712014-e2a6c4f6b5a5?w=800&auto=format&fit=crop",
+                options: [
+                    "Sugerencia para girar",
+                    "Movimiento protegido en la dirección de la flecha",
+                    "Solo peatones pueden cruzar",
+                    "Zona de giro opcional"
+                ],
+                correct: 1,
+                explanation: "Una FLECHA VERDE significa que tiene un movimiento PROTEGIDO en esa dirección - el tráfico contrario está detenido. Puede proceder en la dirección de la flecha sin ceder el paso (pero aún debe verificar peatones). Una flecha verde que cambia a luz verde circular significa que ahora debe ceder el paso al tráfico contrario.",
+                terminology: [
+                    "Flecha verde / Green arrow",
+                    "Movimiento protegido / Protected movement",
+                    "Tráfico contrario / Oncoming traffic",
+                    "Ceder el paso / Yield"
+                ]
+            },
+            {
+                question: "¿A qué distancia antes de una parada de autobús no puede estacionarse?",
+                image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&auto=format&fit=crop",
+                options: [
+                    "10 pies",
+                    "20 pies",
+                    "30 pies",
+                    "50 pies"
+                ],
+                correct: 2,
+                explanation: "NO puede estacionarse dentro de 30 PIES antes de una parada de autobús marcada. Esta distancia permite a los autobuses acceder a la parada de manera segura y a los pasajeros subir/bajar sin obstrucciones. Estacionarse en una zona prohibida puede resultar en multa y remolque del vehículo.",
+                terminology: [
+                    "Parada de autobús / Bus stop",
+                    "Estacionarse / Park",
+                    "Pies / Feet",
+                    "Zona prohibida / No parking zone"
+                ]
+            },
+            {
+                question: "¿Qué debe hacer cuando ve luces amarillas intermitentes en una zona escolar?",
+                image: "https://images.unsplash.com/photo-1587691592099-24045742c181?w=800&auto=format&fit=crop",
+                options: [
+                    "Mantener velocidad normal",
+                    "Reducir a 15 MPH",
+                    "Detenerse completamente",
+                    "Acelerar antes de que cambien a rojas"
+                ],
+                correct: 1,
+                explanation: "Las luces AMARILLAS INTERMITENTES en una zona escolar indican que los niños están presentes o que es hora de entrada/salida. DEBE reducir su velocidad a 15 MPH o el límite señalizado para la zona escolar. Esté MUY atento a niños cruzando. El exceso de velocidad en zonas escolares tiene multas duplicadas.",
+                terminology: [
+                    "Luces amarillas intermitentes / Flashing yellow lights",
+                    "Zona escolar / School zone",
+                    "Niños presentes / Children present",
+                    "Multas duplicadas / Double fines"
+                ]
+            },
+            {
+                question: "¿Cuándo debe usar el cinturón de seguridad en Nevada?",
+                image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+                options: [
+                    "Solo en autopistas",
+                    "Solo si va en el asiento delantero",
+                    "Todos los ocupantes, en todos los asientos, siempre",
+                    "Es opcional para adultos"
+                ],
+                correct: 2,
+                explanation: "En Nevada, TODOS los ocupantes (conductores y pasajeros) en TODOS los asientos (delanteros y traseros) DEBEN usar cinturón de seguridad en TODO momento. Niños menores de 6 años o menos de 60 libras deben ir en asientos de seguridad apropiados. La multa por no usar cinturón es de $25 por persona.",
+                terminology: [
+                    "Cinturón de seguridad / Seat belt",
+                    "Todos los ocupantes / All occupants",
+                    "Asiento de seguridad / Car seat/Child restraint",
+                    "Requerido / Required"
+                ]
+            },
+            {
+                question: "¿Qué significa una línea blanca continua entre su carril y otro?",
+                image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+                options: [
+                    "Cambio de carril prohibido",
+                    "Cambio de carril desalentado pero legal si es seguro",
+                    "Solo para carriles de emergencia",
+                    "Indica carril rápido"
+                ],
+                correct: 1,
+                explanation: "Una línea BLANCA CONTINUA (sólida) entre carriles significa que el cambio de carril está DESALENTADO pero NO prohibido. Puede cruzarla si es absolutamente necesario y SEGURO, pero generalmente debe permanecer en su carril. Las líneas continuas a menudo marcan carriles de giro o áreas donde cambiar sería peligroso.",
+                terminology: [
+                    "Línea continua / Solid line",
+                    "Desalentado / Discouraged",
+                    "Cambio de carril / Lane change",
+                    "Seguro / Safe"
+                ]
+            },
+            {
+                question: "¿Qué debe hacer antes de hacer reversa?",
+                image: "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800&auto=format&fit=crop",
+                options: [
+                    "Solo mirar por el espejo retrovisor",
+                    "Caminar alrededor del vehículo, verificar alrededores, usar espejos",
+                    "Confiar solo en la cámara de reversa",
+                    "Tocar el claxon y retroceder rápido"
+                ],
+                correct: 1,
+                explanation: "Antes de hacer REVERSA: (1) CAMINE alrededor del vehículo para verificar niños, mascotas, objetos, (2) verifique TODOS los espejos, (3) VOLTEE físicamente su cabeza y cuerpo para ver por la ventana trasera, (4) use la cámara de reversa como ayuda adicional (NO como única referencia), (5) retroceda LENTAMENTE.",
+                terminology: [
+                    "Reversa / Reverse/Back up",
+                    "Caminar alrededor / Walk around",
+                    "Cámara de reversa / Backup camera",
+                    "Verificar alrededores / Check surroundings"
+                ]
+            },
+            {
+                question: "¿Qué significa una señal naranja de diamante?",
+                image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=800&auto=format&fit=crop",
+                options: [
+                    "Zona recreativa",
+                    "Zona de construcción o trabajo",
+                    "Zona escolar",
+                    "Zona de hospitales"
+                ],
+                correct: 1,
+                explanation: "Las señales NARANJAS (especialmente en forma de diamante) indican ZONAS DE CONSTRUCCIÓN O TRABAJO. Reduzca la velocidad, esté alerto a trabajadores y equipos, siga las señales temporales, y sea paciente. Las multas en zonas de trabajo suelen ser DUPLICADAS. Los trabajadores tienen derecho de paso.",
+                terminology: [
+                    "Naranja / Orange",
+                    "Zona de construcción / Construction zone",
+                    "Zona de trabajo / Work zone",
+                    "Multas duplicadas / Double fines"
+                ]
+            },
+            {
+                question: "¿Cuándo debe encender sus faros delanteros?",
+                image: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800&auto=format&fit=crop",
+                options: [
+                    "Solo de noche",
+                    "Desde el atardecer hasta el amanecer, en mal tiempo, cuando no pueda ver 1,000 pies adelante",
+                    "Solo cuando llueve",
+                    "Es opcional"
+                ],
+                correct: 1,
+                explanation: "Debe encender sus faros: (1) desde el ATARDECER hasta el AMANECER, (2) en LLUVIA, niebla, nieve u otra condición que reduzca visibilidad, (3) cuando NO pueda ver claramente 1,000 PIES adelante, (4) cuando use limpiaparabrisas. En Nevada, conducir sin faros cuando se requieren puede resultar en multa.",
+                terminology: [
+                    "Faros / Headlights",
+                    "Atardecer / Sunset/Dusk",
+                    "Amanecer / Sunrise/Dawn",
+                    "Visibilidad / Visibility"
+                ]
+            },
+            {
+                question: "¿Qué debe hacer si se aproxima a una intersección y la luz está en amarillo pero no puede detenerse de manera segura?",
+                image: "https://images.unsplash.com/photo-1570193712014-e2a6c4f6b5a5?w=800&auto=format&fit=crop",
+                options: [
+                    "Detenerse bruscamente",
+                    "Acelerar para cruzar rápido",
+                    "Continuar con precaución a través de la intersección",
+                    "Dar reversa"
+                ],
+                correct: 2,
+                explanation: "Si está TAN CERCA de la intersección que detenerse sería INSEGURO (causaría frenado brusco o accidente), debe CONTINUAR con precaución a través de la intersección. Sin embargo, no use esto como excusa para acelerar en amarillo - debe intentar detenerse de manera segura si es posible.",
+                terminology: [
+                    "Luz amarilla / Yellow light",
+                    "Detenerse de manera segura / Stop safely",
+                    "Intersección / Intersection",
+                    "Continuar con precaución / Proceed with caution"
+                ]
+            },
+            {
+                question: "¿Cuántos pies antes de girar debe estar en el carril apropiado?",
+                image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+                options: [
+                    "25 pies",
+                    "50 pies",
+                    "75 pies",
+                    "100 pies"
+                ],
+                correct: 3,
+                explanation: "Debe estar posicionado en el carril correcto para su giro al menos 100 PIES antes de la intersección. Esto le da tiempo suficiente para señalizar, verificar espejos y puntos ciegos, y hacer el cambio de carril de manera segura. Los cambios de carril de último minuto son peligrosos y pueden causar accidentes.",
+                terminology: [
+                    "Carril apropiado / Proper lane",
+                    "Posicionado / Positioned",
+                    "Pies / Feet",
+                    "Último minuto / Last minute"
+                ]
+            },
+            {
+                question: "¿Qué indica una señal de 'DO NOT ENTER' (No Entre) circular roja con barra blanca?",
+                image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=800&auto=format&fit=crop",
+                options: [
+                    "Sugerencia de no entrar",
+                    "Prohibido entrar - es una vía de un solo sentido en dirección contraria",
+                    "Solo para emergencias",
+                    "Entrada para residentes únicamente"
+                ],
+                correct: 1,
+                explanation: "La señal 'DO NOT ENTER' (circular roja con barra blanca horizontal) significa que está PROHIBIDO entrar. Generalmente indica que está intentando entrar a una calle de UN SOLO SENTIDO en la dirección EQUIVOCADA. Entrar puede resultar en colisión frontal. Si ve esta señal, NO entre y busque otra ruta.",
+                terminology: [
+                    "Do Not Enter / No entre",
+                    "Prohibido / Prohibited",
+                    "Un solo sentido / One way",
+                    "Dirección contraria / Wrong way"
+                ]
+            },
+            {
+                question: "¿Qué debe hacer si ve a un ciclista en su carril?",
+                image: "https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=800&auto=format&fit=crop",
+                options: [
+                    "Tocar el claxon para que se mueva",
+                    "Rebasar muy cerca para ahorrar tiempo",
+                    "Reducir velocidad, dar al menos 3 pies de espacio al rebasar",
+                    "Forzarlo a salir del camino"
+                ],
+                correct: 2,
+                explanation: "Los ciclistas tienen el MISMO derecho de usar la carretera completa. Cuando rebase: (1) REDUZCA la velocidad, (2) dé al menos 3 PIES de espacio lateral (más es mejor), (3) solo rebase cuando sea SEGURO y legal, (4) NO toque el claxon a menos que sea necesario por seguridad. En Nevada, no dar espacio adecuado puede resultar en multa.",
+                terminology: [
+                    "Ciclista / Cyclist/Bicyclist",
+                    "Rebasar / Pass/Overtake",
+                    "Espacio lateral / Clearance",
+                    "Pies / Feet"
+                ]
+            },
+            {
+                question: "¿Qué debe hacer cuando entra a una curva?",
+                image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+                options: [
+                    "Acelerar en la curva",
+                    "Frenar durante toda la curva",
+                    "Reducir velocidad antes de entrar, acelerar suavemente al salir",
+                    "Mantener misma velocidad"
+                ],
+                correct: 2,
+                explanation: "Al tomar una CURVA: (1) REDUZCA la velocidad ANTES de entrar (no durante), (2) mire HACIA donde quiere ir (no al frente inmediato), (3) mantenga velocidad constante DURANTE la curva, (4) ACELERE suavemente al SALIR. Frenar o acelerar bruscamente en una curva puede causar derrape y pérdida de control.",
+                terminology: [
+                    "Curva / Curve",
+                    "Reducir velocidad / Slow down",
+                    "Acelerar suavemente / Accelerate gently",
+                    "Derrape / Skid"
+                ]
+            },
+            {
+                question: "Si su acelerador se atora, ¿qué debe hacer?",
+                image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+                options: [
+                    "Apagar el motor girando la llave",
+                    "Cambiar a neutral, frenar, orillarse, luego apagar motor",
+                    "Jalar el freno de emergencia fuertemente",
+                    "Quitar las llaves inmediatamente"
+                ],
+                correct: 1,
+                explanation: "Si el acelerador se ATORA: (1) Cambie inmediatamente a NEUTRAL (N), (2) FRENE normalmente, (3) ORILLE a lugar seguro, (4) LUEGO apague el motor. NO apague el motor mientras conduce (perderá dirección asistida y frenos de potencia). NO jale el freno de emergencia bruscamente (causará derrape).",
+                terminology: [
+                    "Acelerador atora / Stuck accelerator",
+                    "Neutral / Neutral gear",
+                    "Orillarse / Pull over",
+                    "Dirección asistida / Power steering"
+                ]
+            },
+            {
+                question: "¿Qué significa cuando un semáforo tiene una luz verde circular y una flecha roja?",
+                image: "https://images.unsplash.com/photo-1570193712014-e2a6c4f6b5a5?w=800&auto=format&fit=crop",
+                options: [
+                    "Puede girar en cualquier dirección",
+                    "Puede ir recto pero no puede girar en la dirección de la flecha roja",
+                    "Debe detenerse completamente",
+                    "La señal está rota"
+                ],
+                correct: 1,
+                explanation: "Una luz verde CIRCULAR con una flecha ROJA significa: puede proceder RECTO o girar en otras direcciones permitidas, PERO NO puede girar en la dirección de la flecha roja. Por ejemplo, verde circular + flecha roja izquierda = puede ir recto o girar a la derecha, pero NO a la izquierda.",
+                terminology: [
+                    "Luz verde circular / Circular green light",
+                    "Flecha roja / Red arrow",
+                    "Proceder / Proceed",
+                    "Girar / Turn"
+                ]
+            },
+            {
+                question: "¿Cuál es la regla para ceder el paso en un estacionamiento?",
+                image: "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800&auto=format&fit=crop",
+                options: [
+                    "El vehículo más grande tiene prioridad",
+                    "El vehículo en movimiento cede al que está saliendo de un espacio",
+                    "El vehículo saliendo de un espacio cede al tráfico en movimiento",
+                    "Quien llegue primero"
+                ],
+                correct: 2,
+                explanation: "En un ESTACIONAMIENTO, los vehículos que están SALIENDO de espacios de estacionamiento deben CEDER el paso a los vehículos que ya están en movimiento en los pasillos del estacionamiento. Cuando salga de reversa, hágalo LENTAMENTE y con mucha precaución, verificando constantemente por peatones, vehículos y carritos de compras.",
+                terminology: [
+                    "Estacionamiento / Parking lot",
+                    "Saliendo de un espacio / Backing out",
+                    "Ceder el paso / Yield",
+                    "En movimiento / In motion"
+                ]
+            },
+            {
+                question: "¿Puede entrar en una intersección si hay tráfico bloqueado al otro lado, aunque la luz esté verde?",
+                image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+                options: [
+                    "Sí, porque la luz está verde",
+                    "No, no debe bloquear la intersección",
+                    "Sí, si toca el claxon",
+                    "Depende de la hora del día"
+                ],
+                correct: 1,
+                explanation: "NO debe entrar en una intersección, INCLUSO con luz verde, si el tráfico está bloqueado al otro lado y no puede cruzar completamente. Esto se llama 'bloquear la intersección' o 'gridlock' y es ILEGAL. Debe esperar detrás de la intersección hasta que haya espacio para cruzar completamente.",
+                terminology: [
+                    "Bloquear intersección / Block intersection",
+                    "Luz verde / Green light",
+                    "Tráfico bloqueado / Gridlock"
+                ]
+            },
+            {
+                question: "Al conducir en niebla, debe:",
+                image: "https://images.unsplash.com/photo-1527766833261-b09c3163a791?w=800&auto=format&fit=crop",
+                options: [
+                    "Usar las luces altas",
+                    "Usar las luces bajas y reducir la velocidad",
+                    "Seguir de cerca al vehículo de adelante",
+                    "Encender las luces intermitentes"
+                ],
+                correct: 1,
+                explanation: "En niebla, use las luces BAJAS (no altas, ya que la niebla refleja la luz y reduce aún más la visibilidad), reduzca significativamente la velocidad, y aumente la distancia de seguimiento. Si la niebla es muy densa, considere salir de la carretera en un lugar seguro y esperar.",
+                terminology: [
+                    "Niebla / Fog",
+                    "Luces bajas / Low beams",
+                    "Visibilidad / Visibility"
+                ]
+            },
+            {
+                question: "La multa por no ceder el paso a un peatón en Nevada puede resultar en:",
+                image: "https://images.unsplash.com/photo-1573152143286-0c422b4d2175?w=800&auto=format&fit=crop",
+                options: [
+                    "Solo una advertencia",
+                    "Multa económica y puntos en su licencia",
+                    "Suspensión inmediata de licencia",
+                    "No hay penalidad"
+                ],
+                correct: 1,
+                explanation: "No ceder el paso a un peatón en Nevada resulta en una multa de hasta $395 y 4 puntos de demérito en su licencia de conducir. Los peatones son vulnerables y tienen el derecho de paso en cruces peatonales. Siempre esté atento y ceda el paso.",
+                terminology: [
+                    "Peatón / Pedestrian",
+                    "Multa / Fine",
+                    "Puntos / Points",
+                    "Ceder el paso / Yield"
+                ]
+            }
+        ];
+
+        let correctCount = 0;
+        let incorrectCount = 0;
+        let answeredCount = 0;
+
+        function createQuestions() {
+            const container = document.getElementById('questions-container');
+            
+            questions.forEach((q, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+                questionCard.id = `question-${index}`;
+                
+                let optionsHtml = '';
+                q.options.forEach((option, optIndex) => {
+                    optionsHtml += `
+                        <li class="option" onclick="selectAnswer(${index}, ${optIndex})">
+                            <span class="option-letter">${String.fromCharCode(65 + optIndex)}</span>
+                            <span>${option}</span>
+                        </li>
+                    `;
+                });
+                
+                let imageHtml = '';
+                if (q.image) {
+                    imageHtml = `<img src="${q.image}" alt="Imagen ilustrativa" class="question-image" onerror="this.style.display='none'">`;
+                }
+                
+                let terminologyHtml = '';
+                if (q.terminology && q.terminology.length > 0) {
+                    terminologyHtml = `
+                        <div class="terminology-box">
+                            <div class="terminology-title">Terminología en Inglés:</div>
+                            ${q.terminology.map(term => `<div class="term-item">• ${term}</div>`).join('')}
+                        </div>
+                    `;
+                }
+                
+                questionCard.innerHTML = `
+                    <span class="question-number">Pregunta ${index + 1} de 50</span>
+                    ${imageHtml}
+                    <div class="question-text">${q.question}</div>
+                    <ul class="options">
+                        ${optionsHtml}
+                    </ul>
+                    <div class="explanation" id="explanation-${index}">
+                        <div class="explanation-title">Explicación</div>
+                        <div class="explanation-text">${q.explanation}</div>
+                        ${terminologyHtml}
+                    </div>
+                `;
+                
+                container.appendChild(questionCard);
+            });
+        }
+
+        function selectAnswer(questionIndex, selectedOption) {
+            const question = questions[questionIndex];
+            const questionCard = document.getElementById(`question-${questionIndex}`);
+            const options = questionCard.querySelectorAll('.option');
+            const explanation = document.getElementById(`explanation-${questionIndex}`);
+            
+            if (questionCard.classList.contains('correct') || questionCard.classList.contains('incorrect')) {
+                return;
+            }
+            
+            answeredCount++;
+            options.forEach(opt => opt.classList.add('disabled'));
+            options[selectedOption].classList.add('selected');
+            
+            if (selectedOption === question.correct) {
+                correctCount++;
+                options[selectedOption].classList.remove('selected');
+                options[selectedOption].classList.add('correct');
+                questionCard.classList.add('correct');
+            } else {
+                incorrectCount++;
+                options[selectedOption].classList.remove('selected');
+                options[selectedOption].classList.add('incorrect');
+                options[question.correct].classList.add('correct');
+                questionCard.classList.add('incorrect');
+            }
+            
+            explanation.classList.add('show');
+            updateScore();
+            
+            if (questionIndex < questions.length - 1) {
+                setTimeout(() => {
+                    const nextQuestion = document.getElementById(`question-${questionIndex + 1}`);
+                    nextQuestion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 800);
+            }
+            
+            if (answeredCount === questions.length) {
+                setTimeout(showFinalResults, 1000);
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('progress').textContent = `${answeredCount}/50`;
+            document.getElementById('correct').textContent = correctCount;
+            document.getElementById('incorrect').textContent = incorrectCount;
+            
+            const percentage = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0;
+            document.getElementById('percentage').textContent = `${percentage}%`;
+        }
+
+        function showFinalResults() {
+            const finalResults = document.getElementById('finalResults');
+            const finalScore = document.getElementById('finalScore');
+            const finalMessage = document.getElementById('finalMessage');
+            
+            const percentage = Math.round((correctCount / questions.length) * 100);
+            const passed = correctCount >= 40;
+            
+            finalScore.textContent = `${correctCount}/50 (${percentage}%)`;
+            finalScore.className = `final-score ${passed ? 'pass' : 'fail'}`;
+            
+            if (passed) {
+                finalMessage.innerHTML = `
+                    <h3 style="color: #28a745; margin: 20px 0;">🎉 ¡FELICITACIONES! ¡APROBASTE! 🎉</h3>
+                    <p style="font-size: 1.2em; margin: 15px 0;">
+                        Has demostrado un excelente conocimiento de las leyes de tránsito de Nevada.
+                    </p>
+                    <p style="color: #6c757d;">
+                        Necesitabas 40 respuestas correctas (80%) y lograste ${correctCount}.
+                    </p>
+                    <p style="color: #6c757d; margin-top: 10px;">
+                        ¡Estás listo para presentar el examen oficial!
+                    </p>
+                `;
+            } else {
+                const needed = 40 - correctCount;
+                finalMessage.innerHTML = `
+                    <h3 style="color: #dc3545; margin: 20px 0;">No aprobaste esta vez</h3>
+                    <p style="font-size: 1.2em; margin: 15px 0;">
+                        Te faltaron ${needed} respuesta${needed > 1 ? 's' : ''} correcta${needed > 1 ? 's' : ''} para aprobar.
+                    </p>
+                    <p style="color: #6c757d;">
+                        Necesitas 40 respuestas correctas (80%) para aprobar.
+                    </p>
+                    <p style="color: #6c757d; margin-top: 10px;">
+                        Revisa las explicaciones y vuelve a intentarlo. ¡Tú puedes!
+                    </p>
+                `;
+            }
+            
+            finalResults.classList.add('show');
+            finalResults.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function resetExam() {
+            correctCount = 0;
+            incorrectCount = 0;
+            answeredCount = 0;
+            
+            updateScore();
+            document.getElementById('finalResults').classList.remove('show');
+            
+            const questionCards = document.querySelectorAll('.question-card');
+            questionCards.forEach((card, index) => {
+                card.className = 'question-card';
+                
+                const options = card.querySelectorAll('.option');
+                options.forEach(opt => {
+                    opt.className = 'option';
+                });
+                
+                const explanation = card.querySelector('.explanation');
+                explanation.classList.remove('show');
+            });
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.onload = function() {
+            createQuestions();
+        };
+    </script>
+</body>
+</html>
